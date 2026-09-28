@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research Agent — Web-grounded research, powered by AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Global Announcement / Header -->
+  <header class="site-header">
+    <div class="header-inner container">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <circle cx="11" cy="11" r="3" stroke-width="1.5" stroke-dasharray="2 2"></circle>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Research Agent</span>
+          <span class="brand-subtitle">Web-grounded research, powered by AI</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-indicator"></span>
+        <span class="status-label">Agent Online</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content container">
+    <!-- Hero / Query Intake Section -->
+    <section class="hero-section">
+      <div class="hero-header">
+        <span class="section-tag">Editorial Research Lab</span>
+        <h1 class="hero-title">Research the web.<br><span class="hero-title-italic">Synthesize the answer.</span></h1>
+        <p class="hero-description">
+          Ask a question and let the agent search, analyze, and synthesize verified web sources into a grounded research brief.
+        </p>
+      </div>
+
+      <!-- Research Input Form -->
+      <form id="research-form" class="research-form" novalidate>
+        <div class="input-card">
+          <label for="question-input" class="sr-only">Research Question</label>
+          <textarea
+            id="question-input"
+            name="question"
+            rows="3"
+            placeholder="Ask a research question... (e.g., What are the recent developments in AI based PCB inspection?)"
+            required
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+
+          <div class="form-bottom-bar">
+            <div class="suggestion-group">
+              <span class="suggestion-label">Suggested:</span>
+              <div class="chips-container">
+                <button type="button" class="chip-btn" data-query="What are the recent developments in AI based PCB inspection?">
+                  AI in PCB inspection
+                </button>
+                <button type="button" class="chip-btn" data-query="How is artificial intelligence being used in semiconductor manufacturing?">
+                  Semiconductor manufacturing AI
+                </button>
+                <button type="button" class="chip-btn" data-query="What are the advantages of edge AI in industrial inspection?">
+                  Edge AI in inspection
+                </button>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="submit-btn" class="btn-primary">
+                <span class="btn-text">Research</span>
+                <span class="btn-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Error Banner -->
+    <section id="error-section" class="error-section hidden" role="alert" aria-live="polite">
+      <div class="error-card">
+        <div class="error-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="error-content">
+          <h2 class="error-title">Research Request Failed</h2>
+          <p id="error-message" class="error-text">We couldn't retrieve web sources for this question. Please try again.</p>
+        </div>
+        <button type="button" id="dismiss-error-btn" class="btn-dismiss" aria-label="Dismiss error">✕</button>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <section id="loading-section" class="loading-section hidden" aria-live="polite">
+      <div class="loading-card">
+        <div class="loading-steps">
+          <div id="step-search" class="step-item active">
+            <div class="step-icon-wrapper">
+              <span class="step-spinner"></span>
+            </div>
+            <div class="step-details">
+              <span class="step-title">Searching the web...</span>
+              <span class="step-sub">Querying Tavily for verified web sources</span>
+            </div>
+          </div>
+          <div class="step-divider"></div>
+          <div id="step-analyze" class="step-item">
+            <div class="step-icon-wrapper">
+              <span class="step-dot"></span>
+            </div>
+            <div class="step-details">
+              <span class="step-title">Analyzing sources...</span>
+              <span class="step-sub">Synthesizing grounded answer with Groq LLM</span>
+            </div>
+          </div>
+        </div>
+        <div class="loading-meta">
+          <p class="loading-hint">The agent is evaluating source veracity and extracting citations.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="result-section" class="result-section hidden" aria-live="polite">
+      <!-- Result Header Bar -->
+      <div class="result-header">
+        <div class="result-header-text">
+          <span class="section-tag">Synthesized Brief</span>
+          <h2 id="result-question-title" class="result-question-title"></h2>
+        </div>
+        <div class="result-actions">
+          <button type="button" id="copy-btn" class="btn-secondary" title="Copy answer to clipboard">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="copy-btn-text">Copy Brief</span>
+          </button>
+          <button type="button" id="new-search-btn" class="btn-secondary">
+            New Research
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Answer Card -->
+      <article class="answer-card">
+        <div class="answer-meta-bar">
+          <span class="meta-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Grounded &amp; Cited
+          </span>
+          <span class="meta-separator">•</span>
+          <span id="source-count-badge" class="meta-item">5 Web Sources</span>
+        </div>
+
+        <div id="answer-body" class="answer-body">
+          <!-- Dynamically populated answer text -->
+        </div>
+      </article>
+
+      <!-- Sources Section -->
+      <section id="sources-container" class="sources-section">
+        <div class="sources-header">
+          <div class="sources-header-left">
+            <h3 class="sources-title">Verified Sources</h3>
+            <p class="sources-sub">Original web sources retrieved and analyzed by the agent</p>
+          </div>
+          <span id="sources-badge" class="badge-olive">0 Sources</span>
+        </div>
+
+        <div id="sources-grid" class="sources-grid">
+          <!-- Dynamically populated source cards -->
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <!-- Editorial Footer -->
+  <footer class="site-footer container">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="footer-brand">Tool-Using Research Agent</span>
+        <span class="footer-sep">—</span>
+        <span class="footer-text">Built with LangGraph, Tavily, and Groq</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-note">No hardcoded data • Real-time synthesis</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
